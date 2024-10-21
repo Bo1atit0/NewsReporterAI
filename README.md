@@ -1,6 +1,6 @@
-# newREPORTERai
+# newsREPORTERai
 
-newREPORTERai is an AI-driven news generation system leveraging Google Gemini models and custom-built agents for research and writing tasks. The system is designed to identify emerging trends in various topics, especially technology, and generate insightful articles.
+newsREPORTERai is an AI-driven news generation system leveraging Google Gemini models and custom-built agents for research and writing tasks. The system is designed to identify emerging trends in various topics, especially technology, and generate insightful articles.
 
 ## Project Overview
 
