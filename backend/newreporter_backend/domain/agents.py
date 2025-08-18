@@ -26,7 +26,7 @@ def create_agents() -> Tuple["Agent", "Agent"]:
         role="Senior Researcher",
         goal='Uncover ground breaking technologies in {topic}',
         verbose=True,
-        memory=True,
+        memory=False,
         backstory=(
             "Driven by curiosity, you're at the forefront of"
             "innovation, eager to explore and share knowledge that could change"
@@ -41,7 +41,7 @@ def create_agents() -> Tuple["Agent", "Agent"]:
         role='Writer',
         goal='Narrate compelling tech stories about {topic}',
         verbose=True,
-        memory=True,
+        memory=False,
         backstory=(
             "With a flair for simplifying complex topics, you craft"
             "engaging narratives that captivate and educate, bringing new"
