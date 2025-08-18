@@ -32,6 +32,8 @@ ENV/
 env/
 env.bak/
 venv.bak/
+backend_env/
+crewgemini_env/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -80,11 +82,17 @@ dmypy.json
 
 # dotenv
 .env
+backend/.env
+backend/.env.root
 
 # Logs
 *.log
 
 # macOS
 .DS_Store
+
+
+# Backend examples/output
+backend/examples/output/
 
 

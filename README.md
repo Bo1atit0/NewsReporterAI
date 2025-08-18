@@ -73,3 +73,96 @@ This will trigger the research task for discovering the next big trend in the gi
 
 Feel free to fork this repository, create a new branch, and submit a pull request. All contributions are welcome!
 
+
+---
+
+## Backend (FastAPI)
+
+The project now includes a modular FastAPI backend located in `backend/`. It provides health/readiness endpoints and a versioned API namespace for future features.
+
+### Structure
+```
+backend/
+  pyproject.toml
+  setup.py
+  requirements.txt
+  pytest.ini
+  README.md
+  .env.example
+  api_demo.py
+  newreporter_backend/
+    __init__.py
+    config.py
+    main.py
+    api/
+      __init__.py
+      routes.py
+      health.py
+      schemas.py
+      deps.py
+    services/
+      __init__.py
+      sample_service.py
+  tests/
+    __init__.py
+    conftest.py
+    test_health.py
+```
+
+### Setup (virtual environment)
+Run these from the repository root:
+```bash
+python3 -m venv backend_env
+source backend_env/bin/activate
+python -m pip install --upgrade pip
+pip install -r backend/requirements.txt
+```
+
+### Environment variables
+Configure local environment variables by copying the example file:
+```bash
+cp backend/.env.example backend/.env
+```
+Then edit `backend/.env` as needed. Example keys:
+- `APP_NAME`, `APP_ENV`, `LOG_LEVEL`, `PORT`, `CORS_ORIGINS`
+
+The FastAPI app loads configuration from `.env` via `python-dotenv` in `newreporter_backend/config.py`.
+
+### Running the API
+With the virtual environment active:
+```bash
+uvicorn newreporter_backend.main:app --reload --port 8000
+```
+Health check:
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+### Endpoints
+- `GET /health` – liveness
+- `GET /ready` – readiness
+- `GET /api/v1/ping` – sample endpoint (returns `{ "message": "pong" }`)
+
+### Tests
+Run tests with pytest:
+```bash
+pytest backend/tests -q
+```
+
+### Demo client
+Use the demo script to call endpoints:
+```bash
+python backend/api_demo.py --base-url http://127.0.0.1:8000
+```
+
+### Packaging
+Install the backend in editable mode if desired:
+```bash
+pip install -e backend
+```
+
+### Security note
+- Do not commit real API keys or secrets. Use `.env` locally and secret managers in production.
+- If sensitive keys were accidentally added to git history, rotate them immediately and purge history if necessary.
+
+For more details see `backend/README.md`.
