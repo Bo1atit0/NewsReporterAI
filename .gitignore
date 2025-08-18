@@ -96,3 +96,8 @@ backend/.env.root
 backend/examples/output/
 
 
+# Generated content & local docs (repo root)
+/new-blog-post.md
+/PRD.md
+
+
