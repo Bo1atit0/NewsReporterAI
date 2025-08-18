@@ -1,6 +1,12 @@
-# newsREPORTERai
+# newsREPORTERai 🚀📰
 
-newsREPORTERai is an AI-driven news generation system leveraging Google Gemini models and custom agents (via CrewAI) for research and writing tasks. It identifies emerging trends (especially in technology) and generates insightful, reader-friendly articles.
+AI-driven news generation using Google Gemini + CrewAI agents. Surfaces emerging trends and turns them into insightful, reader-friendly articles.
+
+![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-blue)
+![API](https://img.shields.io/badge/API-FastAPI-009688)
+![LLM](https://img.shields.io/badge/LLM-Gemini%201.5%20Flash-8A2BE2)
+![Orchestrator](https://img.shields.io/badge/Orchestrator-CrewAI-orange)
+![License](https://img.shields.io/badge/license-MIT-green)
 
 ## Highlights
 - **Dual-Agent Pipeline**: `news_researcher` + `news_writer` orchestrated by CrewAI.
@@ -10,6 +16,19 @@ newsREPORTERai is an AI-driven news generation system leveraging Google Gemini m
 - **Robust Fallback**: If CrewAI stack isn’t available, the system uses Gemini directly to ensure real content is returned.
 
 ---
+
+## Table of Contents
+- [Getting Started (Conda-first)](#getting-started-conda-first)
+- [Project Structure](#project-structure)
+- [Endpoints](#endpoints)
+- [Testing](#testing)
+- [Architecture](#architecture)
+- [Screenshots](#screenshots)
+- [Troubleshooting & Notes](#troubleshooting--notes)
+- [Roadmap](#roadmap)
+- [FAQs](#faqs)
+- [Contributing](#contributing)
+- [Security](#security)
 
 ## Getting Started (Conda-first)
 
@@ -114,6 +133,45 @@ new-blog-post.md        # Latest generated article (when using CrewAI with outpu
 
 ---
 
+## Architecture
+
+High-level flow:
+
+```
+[Client / api_demo.py]
+        |
+        v
+ [FastAPI /api/v1/generate]  -->  [integrations/crew_runner.run_generation]
+                                        |  (Primary) CrewAI: Agents + Tasks
+                                        |       - domain/agents.py (memory disabled by default)
+                                        |       - domain/tasks.py
+                                        |       - domain/tools.py (Serper search)
+                                        |  (Fallback) Direct Gemini generation
+                                        v
+                                 [Article Markdown]
+                                        |
+                                        v
+                              new-blog-post.md (when CrewAI writes output)
+```
+
+- CrewAI path yields richer, web-researched content and writes to `new-blog-post.md`.
+- Fallback guarantees real output even if memory stack or imports fail.
+
+---
+
+## Screenshots
+
+Add screenshots/GIFs of the API demo or rendered article here:
+
+```
+docs/
+  screenshots/
+    demo-call.png
+    article-preview.png
+```
+
+---
+
 ## Endpoints
 - `GET /health` – liveness
 - `GET /ready` – readiness
@@ -148,6 +206,25 @@ pytest backend/tests -q
   ```
 
 ---
+
+## Roadmap
+- [ ] Richer prompt templates for different verticals (e.g., fintech, biotech, energy)
+- [ ] Streaming responses over SSE/WebSocket
+- [ ] Pluggable search providers (Google, Tavily, Bing)
+- [ ] Dockerfile + CI workflow
+- [ ] Vector memory re-introduction with stable dependency profile
+
+---
+
+## FAQs
+- **Why do I sometimes see a “Placeholder Article”?**
+  - CrewAI executed but lacked live search context. Set `SERPER_API_KEY` in `backend/.env` and re-run.
+- **How do I avoid macOS onnxruntime issues?**
+  - Use the provided Conda env (`backend/environment.yml`) which selects a compatible build.
+- **Where is the article saved?**
+  - CrewAI path writes to `new-blog-post.md`; fallback returns content in the API response (no file).
+- **Can I run without Conda?**
+  - Yes, but Conda is recommended on macOS. A `backend/requirements.txt` exists if you prefer virtualenv.
 
 ## Contributing
 Contributions are welcome! Fork the repo, create a feature branch, and open a PR. Please keep secrets out of git and use `.env` locally.
