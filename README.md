@@ -1,88 +1,82 @@
 # newsREPORTERai
 
-newsREPORTERai is an AI-driven news generation system leveraging Google Gemini models and custom-built agents for research and writing tasks. The system is designed to identify emerging trends in various topics, especially technology, and generate insightful articles.
+newsREPORTERai is an AI-driven news generation system leveraging Google Gemini models and custom agents (via CrewAI) for research and writing tasks. It identifies emerging trends (especially in technology) and generates insightful, reader-friendly articles.
 
-## Project Overview
+## Highlights
+- **Dual-Agent Pipeline**: `news_researcher` + `news_writer` orchestrated by CrewAI.
+- **LLM**: Google Gemini (Gemini 1.5 Flash) via `langchain_google_genai`.
+- **Search Tooling**: Serper-powered search for web research.
+- **FastAPI Backend**: Modular API with health/readiness and generation endpoints.
+- **Robust Fallback**: If CrewAI stack isn’t available, the system uses Gemini directly to ensure real content is returned.
 
-This project uses CrewAI to orchestrate research and writing agents that work collaboratively to identify trends and write engaging, easy-to-understand blog posts about these trends. The agents utilize Google Gemini models (Gemini 1.5 Flash) for LLM capabilities and the Serper API for internet search functionality. 
+---
 
-### Features
-- **Research Agent**: A Senior Researcher tasked with uncovering groundbreaking technologies and trends.
-- **Writing Agent**: A Writer specialized in creating compelling tech stories, focusing on simplifying complex topics.
-- **Tools**: Internet search tool powered by Serper API.
-- **Tasks**: Includes researching and writing tasks that produce trend reports and blog posts on a given topic.
+## Getting Started (Conda-first)
 
-## Installation
+We recommend using Conda for a smooth macOS setup and a compatible `onnxruntime` build.
 
-### Prerequisites
-- Python 3.x
-- `pip` for package installation
-- Google API Key and Serper API Key (set in `.env` file)
-
-### Clone the Repository
+### 1) Clone
 ```bash
 git clone https://github.com/austinLorenzMccoy/newREPORTERai.git
 cd newREPORTERai
 ```
 
-### Setup Environment Variables
-
-Create a `.env` file in the project root with the following keys:
-```
-GOOGLE_API_KEY=<Your_Google_API_Key>
-SERPER_API_KEY=<Your_Serper_API_Key>
-```
-
-### Install Dependencies
-
+### 2) Environment variables
+Create `backend/.env` (copy the example):
 ```bash
-pip install -r requirements.txt
+cp backend/.env.example backend/.env
+```
+Then populate at least:
+- `GOOGLE_API_KEY=<your_google_api_key>`
+- `SERPER_API_KEY=<your_serper_api_key>`
+
+Optional service config:
+- `APP_NAME`, `APP_ENV`, `LOG_LEVEL`, `PORT`, `CORS_ORIGINS`
+
+### 3) Create the Conda environment
+```bash
+conda env create -f backend/environment.yml
+conda activate newreporter_backend
 ```
 
-### Required Python Packages
-- `crewai`
-- `langchain_google_genai`
-- `python-dotenv`
-
-### Usage
-
-You can start the AI-driven research and writing tasks by calling the `kickoff` method on the crew object.
-
-Example usage:
-```python
-from crew import crew
-
-# Start task execution
-result = crew.kickoff(inputs={'topic': 'AI in healthcare'})
-print(result)
+### 4) (Optional) CrewAI-friendly pins
+If you want a tighter dependency matrix for CrewAI + LangChain components:
+```bash
+pip install -r backend/requirements-crewai-full.txt
 ```
 
-This will trigger the research task for discovering the next big trend in the given topic and the writing task to create an engaging blog post.
+### 5) Run the API
+```bash
+uvicorn newreporter_backend.main:app \
+  --app-dir backend \
+  --host 127.0.0.1 \
+  --port 8000 \
+  --reload
+```
 
-## Project Structure
+Health checks:
+```bash
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/ready
+```
 
-- **`agents.py`**: Defines the `news_researcher` and `news_writer` agents.
-- **`tools.py`**: Initializes the internet search tool (Serper API).
-- **`tasks.py`**: Contains the task definitions for research and writing.
-- **`crew.py`**: Orchestrates the agents and tasks using CrewAI.
-- **`.env`**: Stores API keys and other environment variables.
-- **`.gitignore`**: Ignores environment files and other unnecessary items for version control.
-- **`new-blog-post.md`**: Contains the output from the writing task, in markdown format.
+### 6) Try the demo client
+```bash
+python backend/api_demo.py --base-url http://127.0.0.1:8000 --self-check
+python backend/api_demo.py --base-url http://127.0.0.1:8000 --generate --topic "AI in healthcare"
+```
 
-## Contributing
-
-Feel free to fork this repository, create a new branch, and submit a pull request. All contributions are welcome!
-
+Behavior:
+- If the full CrewAI pipeline is available, you’ll get CrewAI-authored content and an `output_file` path (e.g., `new-blog-post.md`).
+- If CrewAI imports fail (e.g., memory stack issues), the fallback produces real content via Gemini (no `output_file`).
 
 ---
 
-## Backend (FastAPI)
-
-The project now includes a modular FastAPI backend located in `backend/`. It provides health/readiness endpoints and a versioned API namespace for future features.
-
-### Structure
+## Project Structure
 ```
 backend/
+  environment.yml
+  requirements-crewai-full.txt
   pyproject.toml
   setup.py
   requirements.txt
@@ -100,6 +94,12 @@ backend/
       health.py
       schemas.py
       deps.py
+    domain/
+      agents.py
+      tasks.py
+      tools.py
+    integrations/
+      crew_runner.py
     services/
       __init__.py
       sample_service.py
@@ -107,62 +107,55 @@ backend/
     __init__.py
     conftest.py
     test_health.py
+    test_services_sample_service.py
+
+new-blog-post.md        # Latest generated article (when using CrewAI with output)
 ```
 
-### Setup (virtual environment)
-Run these from the repository root:
-```bash
-python3 -m venv backend_env
-source backend_env/bin/activate
-python -m pip install --upgrade pip
-pip install -r backend/requirements.txt
-```
+---
 
-### Environment variables
-Configure local environment variables by copying the example file:
-```bash
-cp backend/.env.example backend/.env
-```
-Then edit `backend/.env` as needed. Example keys:
-- `APP_NAME`, `APP_ENV`, `LOG_LEVEL`, `PORT`, `CORS_ORIGINS`
-
-The FastAPI app loads configuration from `.env` via `python-dotenv` in `newreporter_backend/config.py`.
-
-### Running the API
-With the virtual environment active:
-```bash
-uvicorn newreporter_backend.main:app --reload --port 8000
-```
-Health check:
-```bash
-curl http://127.0.0.1:8000/health
-```
-
-### Endpoints
+## Endpoints
 - `GET /health` – liveness
 - `GET /ready` – readiness
-- `GET /api/v1/ping` – sample endpoint (returns `{ "message": "pong" }`)
+- `GET /api/v1/ping` – sample
+- `POST /api/v1/generate` – triggers the CrewAI workflow or the Gemini fallback
 
-### Tests
-Run tests with pytest:
+Example:
+```bash
+curl -X POST \
+  http://127.0.0.1:8000/api/v1/generate \
+  -H 'Content-Type: application/json' \
+  -d '{"topic": "AI in healthcare"}'
+```
+
+---
+
+## Testing
 ```bash
 pytest backend/tests -q
 ```
 
-### Demo client
-Use the demo script to call endpoints:
-```bash
-python backend/api_demo.py --base-url http://127.0.0.1:8000
-```
+---
 
-### Packaging
-Install the backend in editable mode if desired:
-```bash
-pip install -e backend
-```
+## Troubleshooting & Notes
+- **Conda + onnxruntime (macOS)**: The provided `backend/environment.yml` selects a compatible macOS build to avoid binary issues.
+- **CrewAI vs Fallback**: The system always returns real content. When CrewAI is unavailable (e.g., memory deps), it falls back to direct Gemini generation.
+- **API Keys**: Missing `GOOGLE_API_KEY` or `SERPER_API_KEY` will limit capabilities (no search or LLM). Ensure `backend/.env` is populated.
+- **Port conflicts**: If `:8000` is busy, start uvicorn on another port, e.g., `--port 8010`, and pass the same base URL to `api_demo.py`.
+- **Editable install (optional)**:
+  ```bash
+  pip install -e backend
+  ```
 
-### Security note
-- Do not commit real API keys or secrets. Use `.env` locally and secret managers in production.
-- If sensitive keys were accidentally added to git history, rotate them immediately and purge history if necessary.
+---
 
-For more details see `backend/README.md`.
+## Contributing
+Contributions are welcome! Fork the repo, create a feature branch, and open a PR. Please keep secrets out of git and use `.env` locally.
+
+---
+
+## Security
+- Do not commit real API keys or secrets. Use `.env` locally and a secret manager in production.
+- If sensitive keys were committed by mistake, rotate immediately and purge history if needed.
+
+For more backend details, see `backend/README.md`.
