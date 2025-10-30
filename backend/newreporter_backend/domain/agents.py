@@ -16,7 +16,7 @@ def create_agents() -> Tuple["Agent", "Agent"]:
     from .tools import tool  # noqa: WPS433
 
     llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash",
+        model=os.getenv("MODEL"),
         verbose=True,
         temperature=0.5,
         google_api_key=os.getenv("GOOGLE_API_KEY"),

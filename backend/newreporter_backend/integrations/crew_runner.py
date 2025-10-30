@@ -53,7 +53,7 @@ def run_generation(topic: str) -> Dict[str, Any]:
             from langchain_google_genai import ChatGoogleGenerativeAI  # noqa: WPS433
 
             llm = ChatGoogleGenerativeAI(
-                model="gemini-1.5-flash",
+                model=os.getenv("MODEL"),
                 verbose=True,
                 temperature=0.6,
                 google_api_key=os.getenv("GOOGLE_API_KEY"),
