@@ -1,20 +1,20 @@
-name: newreporter_backend
-channels:
-  - conda-forge
-dependencies:
-  - python=3.10
-  - pip
-  - onnxruntime  # conda picks correct macOS build
-  - uvicorn
-  - fastapi
-  - httpx
-  - pytest
-  - python-dotenv
-  - openssl  # avoid SSL issues on macOS
-  - pip:
-      # Core pip deps (will also be installed via requirements.txt, but keep here for clarity)
-      - crewai==0.30.11
-      - crewai-tools==0.2.6
-      - langchain-google-genai==1.0.4
-      - chromadb==0.4.24
-      - embedchain==0.1.98
+# name: newreporter_backend
+# channels:
+#   - conda-forge
+# dependencies:
+#   - python=3.10
+#   - pip
+#   - onnxruntime # conda picks correct macOS build
+#   - uvicorn
+#   - fastapi
+#   - httpx
+#   - pytest
+#   - python-dotenv
+#   - openssl # avoid SSL issues on macOS
+#   - pip:
+#       # Core pip deps (will also be installed via requirements.txt, but keep here for clarity)
+#       - crewai==0.30.11
+#       - crewai-tools==0.2.6
+#       - langchain-google-genai==1.0.4
+#       - chromadb==0.4.24
+#       - embedchain==0.1.98
