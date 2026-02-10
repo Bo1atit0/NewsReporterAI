@@ -1,1 +1,8 @@
 @import 'tailwindcss';
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-beige: #f3e8df;
+  /* --color-dark2: #101010; */
+  --color-bright: #f2b50c;
+}
