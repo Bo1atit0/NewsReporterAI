@@ -1,4 +1,4 @@
-export async function generateArticle({ topic }) {
+export async function generateArticle(topic) {
   const url = await fetch(
     'https://newsreporterai-production.up.railway.app/api/v1/generate',
     {

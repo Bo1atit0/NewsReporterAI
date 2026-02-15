@@ -49,7 +49,11 @@ const Home = () => {
               in-depth analysis, and personalized content to keep you informed
             </p>
             <Link to="/generate">
-              <button className="border border-black py-1 px-4 rounded-3xl text-3xl font-extrabold cursor-pointer hover:bg-bright hover:text-white hover:border-bright hover:shadow-md shadow-amber-700 transition-all duration-300">
+              <button
+                className="border border-black py-1 px-4 rounded-3xl text-3xl font-extrabold cursor-pointer
+               hover:bg-bright hover:text-white hover:border-bright hover:shadow-md
+                shadow-amber-700 transition-all duration-1000 ease-in-out"
+              >
                 Get Started
               </button>
             </Link>
