@@ -6,3 +6,49 @@
   /* --color-dark2: #101010; */
   --color-bright: #f2b50c;
 }
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 1s;
+}
+
+html[data-transition='home-to-generate']::view-transition-old(root) {
+  animation: fade-out 1s ease-in-out forwards;
+}
+
+html[data-transition='home-to-generate']::view-transition-new(root) {
+  animation: slide-in-from-right 1s ease-in-out forwards;
+}
+
+html[data-transition='generate-to-home']::view-transition-old(root) {
+  animation: slide-in-to-right 1s ease-in-out forwards;
+}
+html[data-transition='generate-to-home']::view-transition-new(root) {
+  animation: fade-in 2s ease-in-out forwards;
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-to-right {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes slide-in-from-right {
+  from {
+    transform: translateX(100%);
+  }
+}

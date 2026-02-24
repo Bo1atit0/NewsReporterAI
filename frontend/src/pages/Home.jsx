@@ -1,9 +1,27 @@
 import { FaInstagram } from 'react-icons/fa6';
 import { CiLinkedin } from 'react-icons/ci';
 import Navbar from '../components/Navbar';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router-dom';
+import { navigateWithTransition } from '../lib/utils';
 
 const Home = () => {
+  const navigate = useNavigate();
+
+  const handleClick = (e) => {
+    e.preventDefault();
+
+    navigateWithTransition(navigate, '/generate', 'home-to-generate');
+    // if (!document.startViewTransition) {
+    //   navigate('/generate');
+    //   return;
+    // }
+    // document.startViewTransition(
+    //   () => {
+    //     navigate('/generate');
+    //   },
+    //   { types: ['home'] }
+    // );
+  };
   return (
     <main className="p-4 md:py-5 md:px-12 border border-blue-500 select-none overflow-hidden">
       {/* 4 yellow circles */}
@@ -23,7 +41,7 @@ const Home = () => {
           <img
             src="/assets/NewsReporterAi_hero.webp"
             alt="Hero Image"
-            className="w-full h-full md:h-[40vh] lg:w-[60vw] lg:h-[100vh] object-contain pl-10 lg:absolute lg:-top-12 lg:-left-20"
+            className="w-full h-full md:h-[40vh] lg:w-[60vw] lg:h-[100vh] object-contain pl-2 lg:absolute lg:-top-12 lg:-left-20"
           />
 
           {/* <div className="flex flex-col gap-5 border"> */}
@@ -48,15 +66,16 @@ const Home = () => {
               and insights. Our AI-powered platform delivers real-time updates,
               in-depth analysis, and personalized content to keep you informed
             </p>
-            <Link to="/generate">
-              <button
-                className="border border-black py-1 px-4 rounded-3xl text-3xl font-extrabold cursor-pointer
+            {/* <Link to="/generate" onClick={handleClick}> */}
+            <button
+              className="border border-black py-1 px-4 rounded-3xl text-3xl font-extrabold cursor-pointer
                hover:bg-bright hover:text-white hover:border-bright hover:shadow-md
                 shadow-amber-700 transition-all duration-1000 ease-in-out"
-              >
-                Get Started
-              </button>
-            </Link>
+              onClick={handleClick}
+            >
+              Get Started
+            </button>
+            {/* </Link> */}
           </div>
           {/* </div> */}
         </div>

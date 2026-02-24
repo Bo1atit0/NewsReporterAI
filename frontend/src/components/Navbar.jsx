@@ -1,5 +1,7 @@
 import { NavLink, useLocation } from 'react-router';
 import { cn } from '../lib/utils';
+import { FaHome } from 'react-icons/fa';
+import { TbUsersGroup } from 'react-icons/tb';
 
 const Navbar = () => {
   const navItems = [
@@ -7,28 +9,24 @@ const Navbar = () => {
     { name: 'About Us', href: '/about' },
     { name: 'Contact', href: '/services' },
   ];
+
   const location = useLocation();
   const HomePage = location.pathname === '/';
-  const generatePage = location.pathname === '/generate';
 
   return (
     <header className="pt-6 pb-3 px-4">
       <nav
         className={cn(
           'hidden md:flex ',
-          generatePage && 'flex-col items-start gap-5 py-2',
           HomePage &&
-            'justify-center md:justify-around lg:justify-end items-center'
+            'items-center md:justify-between md:px-5 lg:justify-end lg:px-0 w-full '
         )}
       >
-        <h1 className="text-2xl font-bold mb-0 pl-3 ">LOGO</h1>
-        <div className="h-0.5 w-full mx-auto bg-gray-200" />
+        <h1 className="text-2xl font-bold mb-0 lg:pl-3 ">LOGO</h1>
+
         <div
           className={cn(
-            'flex',
-            generatePage && 'flex-col items-start gap-3 w-full',
-            HomePage &&
-              'w-full md:w-2/3 md:gap-30 justify-end md:justify-center'
+            'flex w-full md:w-2/3 md:gap-25 lg:gap-30 justify-end md:justify-center'
           )}
         >
           {navItems.map((item) => (
@@ -51,15 +49,12 @@ const Navbar = () => {
                   before:absolute before:-bottom-2  before:z-0 before:rounded-t-lg hover:before:h-30 hover:before:opacity-100
                   before:transition-all before:duration-700 before:ease-in-out
                   ${isActive ? ' text-white before:opacity-100 before:h-30' : 'text-neutral-900 before:h-0 before:opacity-0'}
-                  `,
-                  generatePage &&
-                    `after:bg-bright hover:after:h-full py-4 after:bottom-0 w-full after:rounded-2xl pl-3`
+                  `
                 )
               }
             >
               <p
-                className={`relative  whitespace-nowrap text-lg font-bold z-20 px-2 
-              ${generatePage && 'tracking-wider'}`}
+                className={`relative  whitespace-nowrap text-lg font-bold z-20 px-2 `}
               >
                 {item.name}
               </p>
