@@ -4,10 +4,9 @@ import { FaArrowUp } from 'react-icons/fa';
 import { createDummyArticle } from '../api/dummyArticle';
 import { useEffect, useState } from 'react';
 import { RiLoaderFill } from 'react-icons/ri';
-import { cn, navigateWithTransition } from '../lib/utils';
+import { cn } from '../lib/utils';
 import Sidebar from '../components/Sidebar';
-import { useNavigate, useSearchParams } from 'react-router';
-import { PiDotsThree } from 'react-icons/pi';
+import { useSearchParams } from 'react-router';
 import { CiMenuFries } from 'react-icons/ci';
 
 const Generate = () => {
@@ -17,16 +16,14 @@ const Generate = () => {
   const [loading, setLoading] = useState(false);
   const [stored, setStored] = useState(false);
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [deleteAticleId, setDeleteArticleId] = useState(null);
 
   // get article history from local storage on component mount
   useEffect(() => {
-    console.log('Fetching article history from localStorage...');
     const storedHistory = localStorage.getItem('articleHistory');
-    console.log('Raw Article History from localStorage:', storedHistory);
     if (storedHistory) {
       const parsed = JSON.parse(storedHistory);
-      console.log('Parsed Article History:', parsed);
       setArticleHistory(parsed);
       setStored(true);
       const articleId = searchParams.get('articleId');
@@ -34,8 +31,6 @@ const Generate = () => {
         const foundArticle = parsed.find(
           (article) => String(article.id) === articleId
         );
-
-        console.log('Found Article:', foundArticle);
         setSelectedArticle(foundArticle);
       }
     }
@@ -49,104 +44,95 @@ const Generate = () => {
   }, [articleHistory]);
 
   // handle click to generate article
-  const handleClick = () => {
+  const handleClick = async () => {
     if (!topic.trim()) {
       return;
     }
     setLoading(true);
 
-    const userMessages = { role: 'user', content: topic };
-    const aiResponse = {
-      role: 'assistant',
-      content: createDummyArticle(topic),
-    };
-    // simulate delay
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-
-    if (selectedArticle) {
-      const updatedMessages = [
-        ...(selectedArticle.content || []),
-        userMessages,
-        aiResponse,
-      ];
-      const updatedArticle = { ...selectedArticle, content: updatedMessages };
-      setSelectedArticle(updatedArticle);
-      setArticleHistory((prev) =>
-        prev.map((article) =>
-          article.id === updatedArticle.id ? updatedArticle : article
-        )
-      );
-    } else {
-      const newArticle = {
-        id: Date.now(),
-        title: topic,
-        content: [userMessages, aiResponse],
-        date: new Date().toLocaleString(),
+    try {
+      const response = await generateArticle(topic);
+      const userMessages = { role: 'user', content: topic };
+      console.log('user content', userMessages.content);
+      const aiResponse = {
+        role: 'assistant',
+        content: response.result,
       };
-      setSelectedArticle(newArticle);
-      setArticleHistory((prev) => [newArticle, ...prev]);
+
+      if (selectedArticle) {
+        const updatedMessages = [
+          ...(selectedArticle.content || []),
+          userMessages,
+          aiResponse,
+        ];
+        const updatedArticle = { ...selectedArticle, content: updatedMessages };
+        setSelectedArticle(updatedArticle);
+        setArticleHistory((prev) =>
+          prev.map((article) =>
+            article.id === updatedArticle.id ? updatedArticle : article
+          )
+        );
+      } else {
+        const newArticle = {
+          id: Date.now(),
+          title: topic,
+          content: [userMessages, aiResponse],
+          date: new Date().toLocaleString(),
+        };
+        setSelectedArticle(newArticle);
+        setArticleHistory((prev) => [newArticle, ...prev]);
+      }
+      setTopic('');
+    } catch (error) {
+      console.error('Error generating article:', error);
+    } finally {
+      setLoading(false);
     }
-    setTopic('');
   };
 
-  // const handleClick = async () => {
-  //   try {
-  //     const generatedArticle = await generateArticle(topic);
-  //     console.log(generatedArticle);
-  //     if (generatedArticle.error) {
-  //       console.log('Daily limit reached. Try again tomorrow.');
-  //     }
-  //     setArticle(generatedArticle?.result);
-  //   } catch (e) {
-  //     console.error('Error:', e);
-  //   }
-  // };
+  const handleDeleteArticle = (articleId) => {
+    setDeleteArticleId(articleId);
+    console.log('Delete article with ID:', articleId);
+  };
+
+  const handleConfirmDelete = () => {
+    setArticleHistory((prev) =>
+      prev.filter((article) => article.id !== deleteAticleId)
+    );
+    if (selectedArticle?.id === deleteAticleId) {
+      setSelectedArticle(null);
+    }
+    setDeleteArticleId(null);
+  };
+
+  const cancelDelete = () => {
+    setDeleteArticleId(null);
+  };
 
   return (
     <section className="grid grid-cols-1 md:grid-cols-[280px_3fr] overflow-hidden h-screen w-full">
-      <aside className="hidden md:block shadow-lg shadow-gray-500 overflow-auto ">
-        <div className="flex flex-col gap-2 py-3 px-2">
-          <Sidebar setSelectedArticle={setSelectedArticle} />
-          <p className=" text-lg text-gray-500 pl-1">Your Articles</p>
+      {/* ---------------------------------Sidebar---------------------------- */}
+      <div className="flex flex-col gap-2 py-3 px-2">
+        <Sidebar
+          selectedArticle={selectedArticle}
+          setSelectedArticle={setSelectedArticle}
+          articleHistory={articleHistory}
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+          handleDeleteArticle={handleDeleteArticle}
+        />
+      </div>
 
-          <div className="flex flex-col gap-2 w-full ">
-            {articleHistory.map((article) => (
-              <div
-                key={article.id}
-                className={cn(
-                  `group flex gap-2 items-center justify-between 
-                cursor-pointer w-full px-3 py-2 rounded-xl transition-all duration-500 ease-in-out`,
-                  selectedArticle?.id === article.id
-                    ? 'bg-gray-200/80'
-                    : 'hover:bg-gray-200/80 '
-                )}
-              >
-                <button
-                  onClick={() => {
-                    navigate(`/generate?articleId=${article.id}`);
-
-                    setSelectedArticle(article);
-                  }}
-                  className="truncate text-left tracking-tight flex-1 cursor-pointer"
-                >
-                  {article.title}
-                </button>
-                <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transiion-opacity duration-500">
-                  <PiDotsThree className="size-10   text-black" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </aside>
-
-      <div className=" relative h-screen flex flex-col w-full">
-        <div className="absolute top-0 left-0 right-0  flex items-center justify-between px-4 py-4 shadow-lg ">
-          {/* header */}
-          <div className="flex gap-3 items-center md:px-5">
-            <CiMenuFries className="block md:hidden size-6" />
+      <div className=" relative h-screen flex flex-col gap-0 w-full">
+        {/* -----------------------------header--------------------------------------- */}
+        <div className="  flex items-center justify-between px-4 pb-4 md:py-4 shadow-lg">
+          <div className=" flex gap-3 items-center md:px-5">
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="md:hidden"
+            >
+              <CiMenuFries className="size-6 cursor-pointer" />
+            </button>
             <h1 className="text-xl  tracking-tight text-neutral-900">
               Ai Reporter
             </h1>
@@ -161,7 +147,8 @@ const Generate = () => {
           </div>
         </div>
 
-        <section className=" absolute h-full flex flex-col items-center justify-center py-10 w-full ">
+        {/* --------------------------------article section------------------------------------ */}
+        <section className="flex-1 flex flex-col items-center justify-center  w-full overflow-auto">
           {/* article */}
           {selectedArticle ? (
             <article className="flex-1 overflow-y-auto my-6 py-8 w-full">
@@ -190,6 +177,8 @@ const Generate = () => {
                          prose-headings:font-medium prose-headings:tracking-tight
                       prose-headings:text-lg md:prose-headings:text-xl prose-p:text-lg
                       prose-hr:border-gray-200 prose-hr:my-5
+                      prose-pre:overflow-x-auto prose-pre:max-w-full prose-pre:bg-gray-900
+                      prose-pre:text-gray-100 prose-pre:rounded-lg prose-pre:p-6
                       `
                     )}
                   >
@@ -208,7 +197,7 @@ const Generate = () => {
               e.preventDefault();
               handleClick();
             }}
-            className=" w-full md:pb-2 flex justify-center px-5"
+            className=" w-full md:pb-5 pb-10 flex justify-center px-5"
           >
             {/* <div className="absolute -top-4 h-5 w-full bg-gradient-to-t from-gray-200/40 to-transparent pointer-events-none"></div> */}
             <input
@@ -233,7 +222,7 @@ const Generate = () => {
               </div>
 
               {loading ? (
-                <RiLoaderFill className="absolute size-6 md:right-1/2 -translate-x-1/2 right-1.5 text-white animate-spin transition-all duration-700 ease-in-out" />
+                <RiLoaderFill className="absolute size-7 font-bold md:right-1/2 -translate-x-1/2 right-1.5  animate-spin transition-all duration-800 ease-in-out" />
               ) : (
                 <FaArrowUp className="absolute size-7 -translate-x-1/2 right-1/2" />
               )}
@@ -241,13 +230,46 @@ const Generate = () => {
           </form>
         </section>
         {/* 4 yellow circles */}
-        <div className=" absolute bottom-0 left-11 flex gap-2 md:gap-5 justify-end z-15 mb-5">
+        {/* <div className=" absolute bottom-0 left-11 flex gap-2 md:gap-5 justify-end z-15 mb-5">
           <div className="bg-bright size-3  rounded-full" />
           <div className="bg-bright size-3 rounded-full" />
           <div className="bg-bright size-3 rounded-full" />
           <div className="bg-bright size-3 rounded-full" />
-        </div>
+        </div> */}
       </div>
+      {/* overlay */}
+
+      {deleteAticleId && (
+        <div
+          onClick={() => cancelDelete()}
+          className="absolute inset-0 z-50 cursor-pointer"
+        >
+          <div className="absolute inset-0 bg-black/40  backdrop-blur-xs" />
+          <div
+            className="bg-white rounded-xl shadow-lg h-[30vh] md:h-[25vh] w-4/5 md:w-[40vw] absolute left-1/2 right-1/2 -translate-x-1/2 
+        top-1/2 bottom-1/2 -translate-y-1/2 flex flex-col items-center justify-center gap-5 md:gap-10 px-10 mx-auto"
+          >
+            <p className="text-black text-lg md:text-xl font-medium">
+              Are you sure you want to Delete this article?
+            </p>
+            <div className="flex  gap-5 items-center">
+              <button
+                className="border text-whhite px-4 py-2 rounded-lg hover:bg-gray-200 hover:border-gray-200 
+                transition-all duration-500 ease-in-out cursor-pointer"
+                onClick={() => cancelDelete()}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-red-500 hover:bg-red-900 hover:text-white text-lg font-semibold py-2 px-4 rounded-lg transition-all duration-500 ease-in-out cursor-pointer"
+                onClick={() => handleConfirmDelete()}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
