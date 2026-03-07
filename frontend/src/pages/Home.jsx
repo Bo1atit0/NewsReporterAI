@@ -23,7 +23,7 @@ const Home = () => {
     // );
   };
   return (
-    <main className="p-4 md:py-5 md:px-12 border border-blue-500 select-none overflow-hidden">
+    <main className="p-4 md:py-5 md:px-12 border  select-none overflow-hidden">
       {/* 4 yellow circles */}
       <div className="flex gap-5 justify-end mb-3">
         <div className="bg-bright size-3  rounded-full" />
@@ -33,7 +33,7 @@ const Home = () => {
       </div>
 
       {/* grey section */}
-      <section className="md:h-[90vh] shadow-xl rounded-lg  bg-gray-200 flex flex-col gap-5  relative">
+      <section className="md:h-[90vh] shadow-xl rounded-lg  bg-beige flex flex-col gap-5  relative">
         <Navbar />
 
         {/* image and text */}
