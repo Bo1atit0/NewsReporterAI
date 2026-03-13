@@ -64,11 +64,11 @@ const Sidebar = ({
               to={item.href}
               onClick={() => handleClick(item)}
               className={() =>
-                `flex flex-col py-3 px-4 after:rounded-xl text-lg font-medium 
-              relative after:absolute after:inset-0 after:origin-left
-               after:bg-bright after:scale-x-0 hover:after:scale-x-100 after:z-0 after:h-full 
-              hover:after:opacity-100 hover:text-white
-               after:transition-all after:duration-1500 after:ease-in-out
+                `flex flex-col py-3 px-4 text-lg font-medium relative
+                 after:absolute after:inset-0 after:origin-left after:bg-bright 
+                 after:scale-x-0 after:opacity-0 after:z-0 after:h-full 
+              hover:after:opacity-100 hover:text-white hover:after:scale-x-100
+               after:transition-all after:duration-500 after:ease-in-out 
               `
               }
             >
